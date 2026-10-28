@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic-Tac-Toe Classic & AI</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brandX: '#ec4899', // Pink
+                        brandO: '#3b82f6', // Blue
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- External CSS File -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen p-4 text-slate-100">
+
+    <!-- MAIN APP CONTAINER -->
+    <div class="w-full max-w-md glass-panel rounded-3xl p-6 shadow-2xl flex flex-col items-center gap-5 relative overflow-hidden">
+        
+        <!-- HEADER & TITLE -->
+        <div class="w-full flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-pink-500/20 flex items-center justify-center text-pink-400 font-bold text-lg">
+                    ✕
+                </div>
+                <div class="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center text-blue-400 font-bold text-lg">
+                    ◯
+                </div>
+                <h1 class="text-xl font-extrabold tracking-wide text-white ml-1">TIC-TAC-TOE</h1>
+            </div>
+
+            <!-- Audio Toggle & Reset Score -->
+            <div class="flex gap-2">
+                <button onclick="toggleSound()" id="sound-btn" class="w-9 h-9 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/60 flex items-center justify-center text-slate-300 transition">
+                    <i id="sound-icon" class="fa-solid fa-volume-high"></i>
+                </button>
+                <button onclick="resetScores()" title="Reset Scores" class="w-9 h-9 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/60 flex items-center justify-center text-slate-300 hover:text-red-400 transition">
+                    <i class="fa-solid fa-rotate-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- MODE SELECTION TABS -->
+        <div class="w-full grid grid-cols-2 gap-2 bg-slate-900/60 p-1.5 rounded-2xl border border-slate-800/80 text-xs font-semibold">
+            <button onclick="setMode('pvp')" id="mode-pvp-btn" class="py-2.5 rounded-xl transition duration-200 bg-indigo-600 text-white shadow-md">
+                <i class="fa-solid fa-users mr-1.5"></i> 2 Players
+            </button>
+            <button onclick="setMode('ai')" id="mode-ai-btn" class="py-2.5 rounded-xl transition duration-200 text-slate-400 hover:text-white">
+                <i class="fa-solid fa-robot mr-1.5"></i> Vs AI
+            </button>
+        </div>
+
+        <!-- AI DIFFICULTY SELECTOR (HIDDEN IN PVP MODE) -->
+        <div id="ai-difficulty-container" class="w-full hidden flex-col gap-1.5 text-xs">
+            <div class="flex justify-between text-slate-400 px-1 font-medium">
+                <span>AI Difficulty Level:</span>
+                <span id="diff-label" class="text-indigo-400 font-bold">Unbeatable</span>
+            </div>
+            <div class="w-full grid grid-cols-3 gap-1.5 bg-slate-900/40 p-1 rounded-xl border border-slate-800/50">
+                <button onclick="setDifficulty('easy')" id="diff-easy" class="py-1.5 rounded-lg text-slate-400 transition">Easy</button>
+                <button onclick="setDifficulty('medium')" id="diff-medium" class="py-1.5 rounded-lg text-slate-400 transition">Medium</button>
+                <button onclick="setDifficulty('hard')" id="diff-hard" class="py-1.5 rounded-lg bg-indigo-600/80 text-white font-bold transition shadow-sm">Hard</button>
+            </div>
+        </div>
+
+        <!-- SCOREBOARD BOARD -->
+        <div class="w-full grid grid-cols-3 gap-3 text-center">
+            <!-- X Score -->
+            <div class="bg-slate-900/50 border border-pink-500/30 rounded-2xl p-2.5 flex flex-col items-center">
+                <span class="text-[11px] font-bold text-pink-400 tracking-wider">PLAYER X</span>
+                <span id="score-x" class="text-2xl font-extrabold text-white">0</span>
+            </div>
+            <!-- Ties Score -->
+            <div class="bg-slate-900/50 border border-slate-700/40 rounded-2xl p-2.5 flex flex-col items-center">
+                <span class="text-[11px] font-bold text-slate-400 tracking-wider">TIES</span>
+                <span id="score-ties" class="text-2xl font-extrabold text-white">0</span>
+            </div>
+            <!-- O Score -->
+            <div class="bg-slate-900/50 border border-blue-500/30 rounded-2xl p-2.5 flex flex-col items-center">
+                <span id="label-o" class="text-[11px] font-bold text-blue-400 tracking-wider">PLAYER O</span>
+                <span id="score-o" class="text-2xl font-extrabold text-white">0</span>
+            </div>
+        </div>
+
+        <!-- TURN INDICATOR STATUS -->
+        <div id="status-banner" class="w-full py-2 px-4 rounded-xl bg-slate-900/60 border border-slate-800 text-center text-sm font-semibold flex items-center justify-center gap-2">
+            <span id="turn-icon" class="text-pink-400 font-extrabold text-base">✕</span>
+            <span id="status-text" class="text-slate-200">Player X's Turn</span>
+        </div>
+
+        <!-- TIC TAC TOE 3x3 GRID BOARD -->
+        <div class="w-full aspect-square grid grid-cols-3 gap-3 p-2 bg-slate-900/80 rounded-3xl border border-slate-800 shadow-inner relative">
+            <button onclick="handleCellClick(0)" class="cell-btn bg-slate-800/90 hover:bg-slate-750 rounded-2xl flex items-center justify-center text-4xl font-black text-slate-700 cursor-pointer border border-slate-700/50"></button>
+            <button onclick="handleCellClick(1)" class="cell-btn bg-slate-800/90 hover:bg-slate-750 rounded-2xl flex items-center justify-center text-4xl font-black text-slate-700 cursor-pointer border border-slate-700/50"></button>
+            <button onclick="handleCellClick(2)" class="cell-btn bg-slate-800/90 hover:bg-slate-750 rounded-2xl flex items-center justify-center text-4xl font-black text-slate-700 cursor-pointer border border-slate-700/50"></button>
+            <button onclick="handleCellClick(3)" class="cell-btn bg-slate-800/90 hover:bg-slate-750 rounded-2xl flex items-center justify-center text-4xl font-black text-slate-700 cursor-pointer border border-slate-700/50"></button>
+            <button onclick="handleCellClick(4)" class="cell-btn bg-slate-800/90 hover:bg-slate-750 rounded-2xl flex items-center justify-center text-4xl font-black text-slate-700 cursor-pointer border border-slate-700/50"></button>
+            <button onclick="handleCellClick(5)" class="cell-btn bg-slate-800/90 hover:bg-slate-750 rounded-2xl flex items-center justify-center text-4xl font-black text-slate-700 cursor-pointer border border-slate-700/50"></button>
+            <button onclick="handleCellClick(6)" class="cell-btn bg-slate-800/90 hover:bg-slate-750 rounded-2xl flex items-center justify-center text-4xl font-black text-slate-700 cursor-pointer border border-slate-700/50"></button>
+            <button onclick="handleCellClick(7)" class="cell-btn bg-slate-800/90 hover:bg-slate-750 rounded-2xl flex items-center justify-center text-4xl font-black text-slate-700 cursor-pointer border border-slate-700/50"></button>
+            <button onclick="handleCellClick(8)" class="cell-btn bg-slate-800/90 hover:bg-slate-750 rounded-2xl flex items-center justify-center text-4xl font-black text-slate-700 cursor-pointer border border-slate-700/50"></button>
+        </div>
+
+        <!-- RESTART GAME BUTTON -->
+        <button onclick="restartMatch()" class="w-full py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 active:scale-[0.98] transition font-bold text-sm tracking-wide text-white shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 cursor-pointer">
+            <i class="fa-solid fa-play"></i> Restart Round
+        </button>
+
+    </div>
+
+    <!-- External JavaScript File -->
+    <script src="script.js"></script>
+</body>
+</html>
