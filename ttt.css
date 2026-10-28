@@ -1,0 +1,42 @@
+{
+user-select: none;
+-webkit-user-select: none;
+touch-action: manipulation;
+}
+
+body {
+font-family: 'Outfit', sans-serif;
+background: linear-gradient(135deg, #0f172a, #1e1b4b);
+min-height: 100vh;
+}
+
+.cell-btn {
+transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.cell-btn:active {
+transform: scale(0.92);
+}
+
+/* Winning Glow Animation */
+@keyframes pulseGlow {
+0%, 100% {
+transform: scale(1);
+box-shadow: 0 0 20px rgba(236, 72, 153, 0.6);
+}
+50% {
+transform: scale(1.04);
+box-shadow: 0 0 35px rgba(59, 130, 246, 0.8);
+}
+}
+
+.winning-cell {
+animation: pulseGlow 1.2s infinite ease-in-out;
+z-index: 10;
+}
+
+.glass-panel {
+background: rgba(30, 41, 59, 0.7);
+backdrop-filter: blur(12px);
+border: 1px solid rgba(255, 255, 255, 0.1);
+}
